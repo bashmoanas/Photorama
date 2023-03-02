@@ -16,8 +16,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
+        
+        // Access the photos view controller
         let photosViewController = PhotosViewController()
-        window?.rootViewController = photosViewController
+        let navigationController = UINavigationController(rootViewController: photosViewController)
+        
+        window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
 
