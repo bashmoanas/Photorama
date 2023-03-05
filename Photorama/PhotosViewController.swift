@@ -14,9 +14,15 @@ class PhotosViewController: UIViewController {
     /// A temporary image view to download the first picture. After that this will be deleted and replaced with a collection view.
     private let imageView = UIImageView()
     
+    /// Instance of the PhotoStore to initiate the network request from this view controller.
+    var store: PhotoStore!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
+        
+        // Initiate the network request.
+        store.fetchInterestingPhotos()
     }
     
     

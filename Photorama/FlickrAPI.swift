@@ -74,6 +74,4 @@ struct FlickrAPI {
         return components.url!
     }
     
-    
-    
 }
