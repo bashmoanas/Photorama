@@ -17,21 +17,27 @@ final class PhotoStore {
     }()
     
     /// Initiates the web request.
-    func fetchInterestingPhotos() {
+    func fetchInterestingPhotos(completion: @escaping (Result<[Photo], Error>) -> Void) {
         let url = FlickrAPI.interestingPhotosURL
         let request = URLRequest(url: url)
-        let task = session.dataTask(with: request) { data, response, error in
-            if let jsonData = data {
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print(jsonString)
-                }
-            } else if let requestError = error {
-                print("Error fetching interesting photos: \(requestError)")
-            } else {
-                print("Unexpected error with the request")
-            }
+        let task = session.dataTask(with: request) { [self] data, response, error in
+            let result = processPhotosRequest(data: data, error: error)
+            completion(result)
         }
         task.resume()
+    }
+    
+    /// Process the data returned from the `FlickrAPI`
+    /// - Parameters:
+    ///   - data: the data returned from the `FlickrAPI` or nil
+    ///   - error: the error returned from the `FlickrAPI` or nil
+    /// - Returns: Decoded array of photos info or error if the `data` was nil.
+    private func processPhotosRequest(data: Data?, error: Error?) -> Result<[Photo], Error> {
+        guard let jsonData = data else {
+            return .failure(error!)
+        }
+        
+        return FlickrAPI.photos(fromJSON: jsonData)
     }
     
 }

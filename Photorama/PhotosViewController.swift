@@ -22,7 +22,14 @@ class PhotosViewController: UIViewController {
         configureView()
         
         // Initiate the network request.
-        store.fetchInterestingPhotos()
+        store.fetchInterestingPhotos { photosResult in
+            switch photosResult {
+            case .success(let photos):
+                print("Successfully found \(photos.count) photos")
+            case .failure(let error):
+                print("Error fetching interesting photos: \(error)")
+            }
+        }
     }
     
     

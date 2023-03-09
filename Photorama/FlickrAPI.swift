@@ -94,4 +94,33 @@ struct FlickrAPI {
         return components.url!
     }
     
+    
+    // MARK: - Actions
+    
+    /// Parse the data returned from FlickrAPI to an instance of `FlickrResponse`.
+    ///
+    /// If the incoming data is structured JSON in the expected format, then it will be parsed successfully, otherwise an error will be thrown.
+    ///
+    /// - Note: [For the date formatter reference ](https://developer.apple.com/library/archive/qa/qa1480/_index.html)
+    /// - Parameter data: The data returned from the web service.
+    /// - Returns: An array of photos information.
+    static func photos(fromJSON data: Data) -> Result<[Photo], Error> {
+        do {
+            let decoder = JSONDecoder()
+            
+            // Custom decode the date
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+            decoder.dateDecodingStrategy = .formatted(dateFormatter)
+            
+            let flickrResponse = try decoder.decode(FlickrResponse.self, from: data)
+            let photos = flickrResponse.photosInfo.photos.filter { $0.remoteURL != nil }
+            return .success(photos)
+        } catch {
+            return .failure(error)
+        }
+    }
+    
 }

@@ -14,7 +14,7 @@ struct Photo: Codable {
     let title: String
     
     /// The URL to the actual photo.
-    let remoteURL: URL
+    let remoteURL: URL?
     
     /// The photo ID.
     let photoID: String
