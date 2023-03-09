@@ -22,4 +22,13 @@ struct Photo: Codable {
     /// The date taken of the photo.
     let dateTaken: Date
     
+    
+    /// Map the key name returned from the API to a convenient property name.
+    enum CodingKeys: String, CodingKey {
+        case title
+        case remoteURL = "url_z"
+        case photoID = "id"
+        case dateTaken = "datetaken"
+    }
+    
 }

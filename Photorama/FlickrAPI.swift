@@ -7,6 +7,26 @@
 
 import Foundation
 
+/// Represent the response from the Flickr server.
+struct FlickrResponse: Codable {
+    let photosInfo: FlickrPhotosResponse
+    
+    /// Map the key name returned from the API to a convenient property name.
+    enum CodingKeys: String, CodingKey {
+        case photosInfo = "photos"
+    }
+}
+
+/// An intermediary struct to represent the response from Flickr service.
+struct FlickrPhotosResponse: Codable {
+    let photos: [Photo]
+    
+    /// Map the key name returned from the API to a convenient property name.
+    enum CodingKeys: String, CodingKey {
+        case photos = "photo"
+    }
+}
+
 /// The end point to hit on the Flickr Server.
 enum EndPoint: String {
     
