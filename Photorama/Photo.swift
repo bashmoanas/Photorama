@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represent each photo that is returned from the web service request.
-struct Photo {
+struct Photo: Codable {
     
     /// The photo title.
     let title: String
