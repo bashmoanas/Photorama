@@ -5,7 +5,16 @@
 //  Created by Anas Bashandy on 05/03/2023.
 //
 
-import Foundation
+import UIKit
+
+/// Photo related errors.
+enum PhotoError: Error {
+    /// This error is thrown in case we are unable to create a valid UIImage from the data returned from the network call.
+    case imageCreationError
+    
+    /// This error is thrown in case an incorrect photo info is passed as argument to the `fetchImage` method.
+    case missingImageURL
+}
 
 /// Responsible for initiating the web service requests.
 final class PhotoStore {
@@ -22,7 +31,30 @@ final class PhotoStore {
         let request = URLRequest(url: url)
         let task = session.dataTask(with: request) { [self] data, response, error in
             let result = processPhotosRequest(data: data, error: error)
-            completion(result)
+            OperationQueue.main.addOperation {
+                completion(result)
+            }
+        }
+        task.resume()
+    }
+    
+    /// Initiates the web request to download a specific image.
+    /// - Parameters:
+    ///   - photo: the photo information that contains the specific URL for our image.
+    ///   - completion: Escaping closure to be called once the network call is finished. It either contains an image or will throw a photo error.
+    func fetchImage(for photo: Photo, completion: @escaping (Result<UIImage, Error>) -> Void) {
+        guard let photoURL = photo.remoteURL else {
+            completion(.failure(PhotoError.missingImageURL))
+            return
+        }
+        
+        let request = URLRequest(url: photoURL)
+        
+        let task = session.dataTask(with: request) { [self] data, response, error in
+            let result = processImageRequest(data: data, error: error)
+            OperationQueue.main.addOperation {
+                completion(result)
+            }
         }
         task.resume()
     }
@@ -38,6 +70,24 @@ final class PhotoStore {
         }
         
         return FlickrAPI.photos(fromJSON: jsonData)
+    }
+    
+    /// Process the data returned from the photo info request. It returns a valid `UIImage` or a `PhotoError`.
+    /// - Parameters:
+    ///   - data: the data returned from the photo info request.
+    ///   - error: the error returned from the photo infor request.
+    /// - Returns: A valid `UIImage` or a `PhotoError` otherwise
+    private func processImageRequest(data: Data?, error: Error?) -> Result<UIImage, Error> {
+        guard let imageData = data,
+              let image = UIImage(data: imageData) else {
+            if data == nil {
+                return .failure(error!)
+            } else {
+                return .failure(PhotoError.imageCreationError)
+            }
+        }
+        
+        return .success(image)
     }
     
 }

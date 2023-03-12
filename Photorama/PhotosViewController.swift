@@ -22,10 +22,13 @@ class PhotosViewController: UIViewController {
         configureView()
         
         // Initiate the network request.
-        store.fetchInterestingPhotos { photosResult in
+        store.fetchInterestingPhotos { [self] photosResult in
             switch photosResult {
             case .success(let photos):
                 print("Successfully found \(photos.count) photos")
+                if let firstPhoto = photos.first {
+                    updateImageView(for: firstPhoto)
+                }
             case .failure(let error):
                 print("Error fetching interesting photos: \(error)")
             }
@@ -72,6 +75,18 @@ class PhotosViewController: UIViewController {
             imageView.topAnchor.constraint(equalTo: view.topAnchor),
             imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+    }
+    
+    private func updateImageView(for photo: Photo) {
+        store.fetchImage(for: photo) { [self] imageResult in
+            
+            switch imageResult {
+            case .success(let image):
+                imageView.image = image
+            case .failure(let error):
+                print("Error downloading image: \(error)")
+            }
+        }
     }
     
 }
