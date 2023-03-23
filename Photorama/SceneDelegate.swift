@@ -18,8 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         // Access the photos view controller and sets its PhotoStore.
+        let imageStore = ImageStore()
         let photosViewController = PhotosViewController()
-        photosViewController.store = PhotoStore()
+        photosViewController.store = PhotoStore(imageStore: imageStore)
         let navigationController = UINavigationController(rootViewController: photosViewController)
         
         window?.rootViewController = navigationController

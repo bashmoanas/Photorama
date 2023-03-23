@@ -9,13 +9,31 @@ import UIKit
 
 class PhotosViewController: UIViewController {
     
+    /// Identifier for the collection view sections.
+    enum Section {
+        /// Contains all the photos in one section.
+        case main
+    }
+    
     // MARK: - UIViews
     
-    /// A temporary image view to download the first picture. After that this will be deleted and replaced with a collection view.
-    private let imageView = UIImageView()
+    /// Manages UI for the photos downloaded from Flickr.
+    private lazy var collectionView = makeCollectionView()
+    
+    /// The data source for the collection view
+    private lazy var dataSource = makeDataSource()
+    
+    /// All the photos downloaded from Flickr.
+    var photos = [Photo]()
+    
+    
+    // MARK: - Properties
     
     /// Instance of the PhotoStore to initiate the network request from this view controller.
     var store: PhotoStore!
+    
+    
+    // MARK: - View Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,12 +43,11 @@ class PhotosViewController: UIViewController {
         store.fetchInterestingPhotos { [self] photosResult in
             switch photosResult {
             case .success(let photos):
-                print("Successfully found \(photos.count) photos")
-                if let firstPhoto = photos.first {
-                    updateImageView(for: firstPhoto)
-                }
+                self.photos = photos
+                applySnapshot()
             case .failure(let error):
                 print("Error fetching interesting photos: \(error)")
+                self.photos.removeAll()
             }
         }
     }
@@ -38,55 +55,121 @@ class PhotosViewController: UIViewController {
     
     // MARK: - Helper Methods
     
-    /// Configure the view controller's main view
+    /// Configure the view controller's main view.
     ///
-    /// All UI configuration should pass through this method
-    ///
-    /// - Fix the background color as the view was created programmatically.
+    /// All UI configuration should pass through this method.
     private func configureView() {
-        view.backgroundColor = .systemBackground
-        
+        configureCollectionView()
         configureNavigationBar()
-        configureImageView()
     }
     
-    /// Configure the navigation bar
+    /// Configure the navigation bar.
     ///
     /// - Add a title
     private func configureNavigationBar() {
         title = "Photorama"
     }
     
-    /// Configure the image view
+    /// Use compositional layout to generate a basic grid layout.
+    /// - Returns: An instance of `UICollectionViewCompositionalLayout` ready to be used.
+    private func generateGridLayout() -> UICollectionViewCompositionalLayout {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1))
+        let photoItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        photoItem.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+        
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1/4), heightDimension: .fractionalWidth(1/4))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, repeatingSubitem: photoItem, count: 4)
+        
+        let section = NSCollectionLayoutSection(group: group)
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        
+        return layout
+    }
+    
+    /// Initializes the collection view.
+    /// - Returns: A collection view using composotional layout.
+    private func makeCollectionView() -> UICollectionView {
+        UICollectionView(frame: .zero, collectionViewLayout: generateGridLayout())
+    }
+    
+    /// Configure the collection View.
     ///
-    /// - Add as a subview
-    /// - configure its appearance
-    /// - apply its constraints
-    private func configureImageView() {
-        view.addSubview(imageView)
+    /// - Adds the collection view as a subview.
+    /// - Assign this view controller to be the collection view's delegate.
+    /// - Apply Collection View's Constraints.
+    private func configureCollectionView() {
+        view.addSubview(collectionView)
         
-        imageView.contentMode = .scaleAspectFill
+        collectionView.delegate = self
         
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
-    private func updateImageView(for photo: Photo) {
-        store.fetchImage(for: photo) { [self] imageResult in
-            
-            switch imageResult {
-            case .success(let image):
-                imageView.image = image
-            case .failure(let error):
-                print("Error downloading image: \(error)")
-            }
+    /// Prepare the `PhotoCell` for use.
+    ///
+    /// The `PhotoCell` either contains a `Photo` or not.
+    /// If it contains a `Photo`, its configuration is done via the collection view's delegate method `willDisplayItem` for performance reasons.
+    /// When it doen't contains a `Photo`, a spinner should animate indicating a `Photo` is being downloaded.
+    /// - Returns: A configured `PhotoCell`.
+    private func registerPhotoCell() -> UICollectionView.CellRegistration<PhotoCell, Photo> {
+        return UICollectionView.CellRegistration<PhotoCell, Photo> { cell, indexPath, item in
+            cell.configure(with: nil)
         }
     }
     
+    /// Prepares the data source for the collection view.
+    /// - Returns: An instance of `UICollectionViewDiffableDataSource` with the appropriate section and photo.
+    private func makeDataSource() -> UICollectionViewDiffableDataSource<Section, Photo> {
+        let photoCellRegistration = registerPhotoCell()
+        let dataSource = UICollectionViewDiffableDataSource<Section, Photo>(collectionView: collectionView) { collectionView, indexPath, photo in
+            let cell = collectionView.dequeueConfiguredReusableCell(using: photoCellRegistration, for: indexPath, item: photo)
+            return cell
+        }
+        
+        return dataSource
+    }
+    
+    /// Apply the current state of data to the view controller's data source at a single point of time.
+    /// - Parameter animatingDifferences: whether to animate the data changes or not depending on the situation.
+    private func applySnapshot(animatingDifferences: Bool = true) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(photos)
+        dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+    }
+    
+}
+
+
+extension PhotosViewController: UICollectionViewDelegate {
+    
+    // MARK: - UICollectionViewDelegate
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let photo = photos[indexPath.item]
+        
+        // Start downloading the photo for the cell that is about to be displayed.
+        store.fetchImage(for: photo) { [self] result in
+            
+            // The index path for the photo might have changed between the time the request started and finished.
+            // So, we get the latest index path
+            guard let photoIndex = photos.firstIndex(of: photo),
+                  case let .success(image) = result else {
+                return
+            }
+            
+            let photoIndexPath = IndexPath(item: photoIndex, section: 0)
+            
+            // Find the photo's cell
+            if let cell = collectionView.cellForItem(at: photoIndexPath) as? PhotoCell {
+                cell.configure(with: image)
+            }
+        }
+    }
 }
