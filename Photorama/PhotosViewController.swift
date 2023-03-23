@@ -127,8 +127,10 @@ class PhotosViewController: UIViewController {
     /// - Returns: An instance of `UICollectionViewDiffableDataSource` with the appropriate section and photo.
     private func makeDataSource() -> UICollectionViewDiffableDataSource<Section, Photo> {
         let photoCellRegistration = registerPhotoCell()
-        let dataSource = UICollectionViewDiffableDataSource<Section, Photo>(collectionView: collectionView) { collectionView, indexPath, photo in
+        let dataSource = UICollectionViewDiffableDataSource<Section, Photo>(collectionView: collectionView) { [self] collectionView, indexPath, photo in
             let cell = collectionView.dequeueConfiguredReusableCell(using: photoCellRegistration, for: indexPath, item: photo)
+            let photo = photos[indexPath.item]
+            cell.photoDescription = photo.title
             return cell
         }
         

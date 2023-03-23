@@ -17,6 +17,12 @@ final class PhotoCell: UICollectionViewCell {
     
     /// An activity indicator that animates if the photo is being downloaded and stop animation once the photo is downloaded.
     private let spinner = UIActivityIndicatorView()
+    
+    
+    // MARK: - Properties
+    
+    /// A description for the photo to be used for accessibility Voice Over.
+    var photoDescription: String?
         
     
     // MARK: - Initialization
@@ -89,6 +95,36 @@ final class PhotoCell: UICollectionViewCell {
         
         spinner.stopAnimating()
         imageView.image = imageToDisplay
+    }
+    
+    
+    // MARK: - Accessibility
+    
+    override var isAccessibilityElement: Bool {
+        get {
+            return true
+        }
+        set {
+            // Ignore
+        }
+    }
+    
+    override var accessibilityLabel: String? {
+        get {
+            return photoDescription
+        }
+        set {
+            // Ignore
+        }
+    }
+    
+    override var accessibilityTraits: UIAccessibilityTraits {
+        get {
+            return super.accessibilityTraits.union([.image, .button])
+        }
+        set {
+            // Ignore
+        }
     }
     
 }

@@ -68,11 +68,17 @@ final class PhotoInfoViewController: UIViewController {
     ///
     /// - Add as a subview to the view controller's view.
     /// - Set the content mode.
+    /// - Allow accessibility.
     /// - Apply appropriate constraints.
     private func configureImageView() {
         view.addSubview(imageView)
         
         imageView.contentMode = .scaleAspectFit
+        
+        // Accessibility
+        imageView.isAccessibilityElement = true
+        imageView.isUserInteractionEnabled = false
+        imageView.accessibilityLabel = photo.title
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -91,6 +97,18 @@ final class PhotoInfoViewController: UIViewController {
             case .failure(let error):
                 print("Error fetching image for photo: \(error)")
             }
+        }
+    }
+    
+    
+    // MARK: - Accessibility
+    
+    override var isAccessibilityElement: Bool {
+        get {
+            return true
+        }
+        set {
+            // Ignore
         }
     }
     
