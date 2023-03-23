@@ -172,4 +172,11 @@ extension PhotosViewController: UICollectionViewDelegate {
             }
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let photo = photos[indexPath.item]
+        let photoInfoViewController = PhotoInfoViewController(photo: photo, store: store)
+        navigationController?.pushViewController(photoInfoViewController, animated: true)
+    }
+    
 }

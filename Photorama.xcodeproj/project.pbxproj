@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C13564C29B9F67800DE3AED /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C13564B29B9F67800DE3AED /* Photo.swift */; };
+		3C2A181D29CC557C00639556 /* PhotoInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C2A181C29CC557C00639556 /* PhotoInfoViewController.swift */; };
 		3C5A9A9929B082D50099F621 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5A9A9829B082D50099F621 /* AppDelegate.swift */; };
 		3C5A9A9B29B082D50099F621 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5A9A9A29B082D50099F621 /* SceneDelegate.swift */; };
 		3C5A9AA229B082D60099F621 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C5A9AA129B082D60099F621 /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 
 /* Begin PBXFileReference section */
 		3C13564B29B9F67800DE3AED /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		3C2A181C29CC557C00639556 /* PhotoInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoInfoViewController.swift; sourceTree = "<group>"; };
 		3C5A9A9529B082D50099F621 /* Photorama.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Photorama.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C5A9A9829B082D50099F621 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3C5A9A9A29B082D50099F621 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				3C60132329B51C75009554C9 /* PhotoStore.swift */,
 				3C5A9AAC29B082FD0099F621 /* PhotosViewController.swift */,
 				3C5E8E0429C5C980003DF649 /* PhotoCell.swift */,
+				3C2A181C29CC557C00639556 /* PhotoInfoViewController.swift */,
 				3C5A9AA129B082D60099F621 /* Assets.xcassets */,
 				3C5A9AA329B082D60099F621 /* LaunchScreen.storyboard */,
 				3C5A9AA629B082D60099F621 /* Info.plist */,
@@ -157,6 +160,7 @@
 				3C5A9A9929B082D50099F621 /* AppDelegate.swift in Sources */,
 				3C5A9A9B29B082D50099F621 /* SceneDelegate.swift in Sources */,
 				3C5A9AAF29B0AB420099F621 /* FlickrAPI.swift in Sources */,
+				3C2A181D29CC557C00639556 /* PhotoInfoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
