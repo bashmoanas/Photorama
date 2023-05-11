@@ -90,14 +90,24 @@ final class PhotoInfoViewController: UIViewController {
     }
     
     private func fetchImage(for photo: Photo) {
-        store.fetchImage(for: photo) { result in
-            switch result {
-            case .success(let image):
-                self.imageView.image = image
-            case .failure(let error):
+        
+        Task {
+            do {
+                self.imageView.image = try await store.fetchImage(for:photo)
+            } catch {
                 print("Error fetching image for photo: \(error)")
             }
+            
         }
+        
+//        store.fetchImage(for: photo) { result in
+//            switch result {
+//            case .success(let image):
+//                self.imageView.image = image
+//            case .failure(let error):
+//                print("Error fetching image for photo: \(error)")
+//            }
+//        }
     }
     
     

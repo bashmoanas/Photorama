@@ -38,16 +38,15 @@ final class PhotoStore {
     }
     
     /// Initiates the web request.
-    func fetchInterestingPhotos(completion: @escaping (Result<[Photo], Error>) -> Void) {
+    func fetchInterestingPhotos() async throws -> [Photo] {
         let url = FlickrAPI.interestingPhotosURL
-        let request = URLRequest(url: url)
-        let task = session.dataTask(with: request) { [self] data, response, error in
-            let result = processPhotosRequest(data: data, error: error)
-            OperationQueue.main.addOperation {
-                completion(result)
-            }
+        do {
+            let (data, _) = try await session.data(from: url)
+            let result = try FlickrAPI.photos(fromJSON: data)
+            return result
+        } catch {
+            throw error
         }
-        task.resume()
     }
     
     /// Initiates the web request to download a specific image.
@@ -60,55 +59,30 @@ final class PhotoStore {
     /// - Parameters:
     ///   - photo: the photo information that contains the specific URL for our image.
     ///   - completion: Escaping closure to be called once the network call is finished. It either contains an image or will throw a photo error.
-    func fetchImage(for photo: Photo, completion: @escaping (Result<UIImage, Error>) -> Void) {
+    func fetchImage(for photo: Photo) async throws -> UIImage {
         
         let photoKey = photo.photoID
         
         // Check the image on disk.
         if let image = imageStore.image(forKey: photoKey) {
             // The image was previously downloaded. Great. return it and exit this method
-            OperationQueue.main.addOperation {
-                completion(.success(image))
-            }
-            return
+            return image
         }
         
         // the image was not downloaded before.
         // Check the imageURL is valid
         guard let photoURL = photo.remoteURL else {
-            completion(.failure(PhotoError.missingImageURL))
-            return
+            throw PhotoError.missingImageURL
         }
         
-        let request = URLRequest(url: photoURL)
-        
-        let task = session.dataTask(with: request) { [self] data, response, error in
-            let result = processImageRequest(data: data, error: error)
-            
-            if case let .success(image) = result {
-                // The image was downloaed successfully.
-                // Save it on disk.
-                imageStore.setImage(image, forKey: photoKey)
-            }
-            
-            OperationQueue.main.addOperation {
-                completion(result)
-            }
+        do {
+            let (data, _) = try await session.data(from: photoURL)
+            let result = try processImageRequest(data: data)
+            imageStore.setImage(result, forKey: photoKey)
+            return result
+        } catch {
+            throw error
         }
-        task.resume()
-    }
-    
-    /// Process the data returned from the `FlickrAPI`
-    /// - Parameters:
-    ///   - data: the data returned from the `FlickrAPI` or nil
-    ///   - error: the error returned from the `FlickrAPI` or nil
-    /// - Returns: Decoded array of photos info or error if the `data` was nil.
-    private func processPhotosRequest(data: Data?, error: Error?) -> Result<[Photo], Error> {
-        guard let jsonData = data else {
-            return .failure(error!)
-        }
-        
-        return FlickrAPI.photos(fromJSON: jsonData)
     }
     
     /// Process the data returned from the photo info request. It returns a valid `UIImage` or a `PhotoError`.
@@ -116,17 +90,11 @@ final class PhotoStore {
     ///   - data: the data returned from the photo info request.
     ///   - error: the error returned from the photo infor request.
     /// - Returns: A valid `UIImage` or a `PhotoError` otherwise
-    private func processImageRequest(data: Data?, error: Error?) -> Result<UIImage, Error> {
-        guard let imageData = data,
-              let image = UIImage(data: imageData) else {
-            if data == nil {
-                return .failure(error!)
-            } else {
-                return .failure(PhotoError.imageCreationError)
-            }
+    private func processImageRequest(data: Data) throws -> UIImage {
+        guard let image = UIImage(data: data) else {
+            throw PhotoError.imageCreationError
         }
-        
-        return .success(image)
+        return image
     }
-    
 }
+

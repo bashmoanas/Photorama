@@ -104,7 +104,7 @@ struct FlickrAPI {
     /// - Note: [For the date formatter reference ](https://developer.apple.com/library/archive/qa/qa1480/_index.html)
     /// - Parameter data: The data returned from the web service.
     /// - Returns: An array of photos information.
-    static func photos(fromJSON data: Data) -> Result<[Photo], Error> {
+    static func photos(fromJSON data: Data) throws -> [Photo] {
         do {
             let decoder = JSONDecoder()
             
@@ -117,9 +117,9 @@ struct FlickrAPI {
             
             let flickrResponse = try decoder.decode(FlickrResponse.self, from: data)
             let photos = flickrResponse.photosInfo.photos.filter { $0.remoteURL != nil }
-            return .success(photos)
+            return photos
         } catch {
-            return .failure(error)
+            throw error
         }
     }
     

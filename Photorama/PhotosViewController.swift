@@ -39,16 +39,15 @@ class PhotosViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         
-        // Initiate the network request.
-        store.fetchInterestingPhotos { [self] photosResult in
-            switch photosResult {
-            case .success(let photos):
-                self.photos = photos
+        Task {
+            do {
+                photos = try await store.fetchInterestingPhotos()
                 applySnapshot()
-            case .failure(let error):
+            } catch {
                 print("Error fetching interesting photos: \(error)")
                 self.photos.removeAll()
             }
+            
         }
     }
     
@@ -156,23 +155,21 @@ extension PhotosViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let photo = photos[indexPath.item]
         
-        // Start downloading the photo for the cell that is about to be displayed.
-        store.fetchImage(for: photo) { [self] result in
-            
-            // The index path for the photo might have changed between the time the request started and finished.
-            // So, we get the latest index path
-            guard let photoIndex = photos.firstIndex(of: photo),
-                  case let .success(image) = result else {
-                return
-            }
-            
-            let photoIndexPath = IndexPath(item: photoIndex, section: 0)
-            
-            // Find the photo's cell
-            if let cell = collectionView.cellForItem(at: photoIndexPath) as? PhotoCell {
-                cell.configure(with: image)
+        Task {
+            do {
+                let image = try await store.fetchImage(for: photo)
+                guard let photoIndex = photos.firstIndex(of: photo) else {
+                    return
+                }
+                let photoIndexPath = IndexPath(item: photoIndex, section: 0)
+                if let cell = collectionView.cellForItem(at: photoIndexPath) as? PhotoCell {
+                    cell.configure(with: image)
+                }
+            } catch {
+                
             }
         }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
