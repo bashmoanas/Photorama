@@ -21,4 +21,4 @@ The app is written using the Model View Controller using a store to manage the i
 
 ## Note
 
-This project is part of the iOS Programming: The Big Nerd Ranch Guide
+This project is part of [the iOS Programming: The Big Nerd Ranch Guide](https://bignerdranch.com/books/ios-programming-the-big-nerd-ranch-guide-7th-edition/)
