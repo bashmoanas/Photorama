@@ -10,8 +10,10 @@ Photorama fetches and parses JSON data from Flickr server using URLSession. It t
 - The first screen displays the interesting photos in a grid using UICollectionView.
 - The user can tap on a photo to navigate to and display this single photo.
 
-![IMG_0320](https://github.com/bashmoanas/Photorama/assets/34455425/c4388d86-84f8-4bd2-b5d9-2623cfe99cce)
-![IMG_0323](https://github.com/bashmoanas/Photorama/assets/34455425/156878f9-a545-4b65-a755-a4161af912b3)
+
+
+![PhotoramaScreenshots 001](https://github.com/bashmoanas/Photorama/assets/34455425/2a7c5e64-a474-40a2-8494-9bfef81fc0f8)
+
 
 
 ## Architecture
